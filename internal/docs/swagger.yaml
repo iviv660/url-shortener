@@ -1,0 +1,75 @@
+basePath: /
+definitions:
+  handler.ErrorResponse:
+    properties:
+      error:
+        example: invalid request body
+        type: string
+    type: object
+  handler.ShortenRequest:
+    properties:
+      url:
+        example: https://github.com/iviv660
+        type: string
+    type: object
+  handler.ShortenResponse:
+    properties:
+      short_code:
+        example: iHwL01z-
+        type: string
+      short_url:
+        example: http://localhost:3000/iHwL01z-
+        type: string
+    type: object
+info:
+  contact: {}
+  description: Мини-сервис для сокращения URL с хранением в Postgres и кэшем в Redis.
+  title: URL Shortener API
+  version: "1.0"
+paths:
+  /{short}:
+    get:
+      description: Делает 302 Redirect на оригинальный URL
+      parameters:
+      - description: короткий код
+        in: path
+        name: short
+        required: true
+        type: string
+      responses:
+        "302":
+          description: Found
+        "404":
+          description: Не найдено
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: Редирект по короткому коду
+  /shorten:
+    post:
+      consumes:
+      - application/json
+      description: Принимает URL и возвращает короткий код/ссылку
+      parameters:
+      - description: URL для сокращения
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.ShortenRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handler.ShortenResponse'
+        "400":
+          description: Неверный запрос
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "429":
+          description: Превышен лимит
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: Создать короткую ссылку
+swagger: "2.0"

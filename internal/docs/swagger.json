@@ -1,0 +1,114 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Мини-сервис для сокращения URL с хранением в Postgres и кэшем в Redis.",
+        "title": "URL Shortener API",
+        "contact": {},
+        "version": "1.0"
+    },
+    "basePath": "/",
+    "paths": {
+        "/shorten": {
+            "post": {
+                "description": "Принимает URL и возвращает короткий код/ссылку",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Создать короткую ссылку",
+                "parameters": [
+                    {
+                        "description": "URL для сокращения",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.ShortenRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ShortenResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Неверный запрос",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "429": {
+                        "description": "Превышен лимит",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/{short}": {
+            "get": {
+                "description": "Делает 302 Redirect на оригинальный URL",
+                "summary": "Редирект по короткому коду",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "короткий код",
+                        "name": "short",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "302": {
+                        "description": "Found"
+                    },
+                    "404": {
+                        "description": "Не найдено",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "handler.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "invalid request body"
+                }
+            }
+        },
+        "handler.ShortenRequest": {
+            "type": "object",
+            "properties": {
+                "url": {
+                    "type": "string",
+                    "example": "https://github.com/iviv660"
+                }
+            }
+        },
+        "handler.ShortenResponse": {
+            "type": "object",
+            "properties": {
+                "short_code": {
+                    "type": "string",
+                    "example": "iHwL01z-"
+                },
+                "short_url": {
+                    "type": "string",
+                    "example": "http://localhost:3000/iHwL01z-"
+                }
+            }
+        }
+    }
+}
